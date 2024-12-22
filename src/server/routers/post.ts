@@ -19,6 +19,7 @@ const defaultPostSelect = {
   text: true,
   createdAt: true,
   updatedAt: true,
+  username: true,
 } satisfies Prisma.PostSelect;
 
 export const postRouter = router({
@@ -92,13 +93,28 @@ export const postRouter = router({
         id: z.string().uuid().optional(),
         title: z.string().min(1).max(32),
         text: z.string().min(1),
+        username: z.string().min(1),
       }),
     )
     .mutation(async ({ input }) => {
       const post = await prisma.post.create({
-        data: input,
+        data: {
+          title: input.title,
+          text: input.text,
+          username: input.username,
+        },
         select: defaultPostSelect,
       });
       return post;
+    }),
+  delete: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { id } = input;
+      await prisma.post.delete({ where: { id } });
     }),
 });

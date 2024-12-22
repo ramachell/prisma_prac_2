@@ -25,6 +25,12 @@ const IndexPage: NextPageWithLayout = () => {
     },
   });
 
+  const deletePost = trpc.post.delete.useMutation({
+    async onSuccess() {
+      await utils.post.list.invalidate();
+    },
+  });
+
   // prefetch all posts for instant navigation
   // useEffect(() => {
   //   const allPosts = postsQuery.data?.pages.flatMap((page) => page.items) ?? [];
@@ -80,10 +86,20 @@ const IndexPage: NextPageWithLayout = () => {
           <Fragment key={page.items[0]?.id || index}>
             {page.items.map((item) => (
               <article key={item.id}>
-                <h3 className="text-2xl font-semibold">{item.title}</h3>
-                <Link className="text-gray-400" href={`/post/${item.id}`}>
+                <h3 className="text-2xl font-semibold">
+                  {item.title} <span className="text-gray-400 text-lg">by {item.username}</span>
+                </h3>
+                
+                <Link className="bg-gray-900 p-2 rounded-md font-semibold disabled:bg-gray-700 disabled:text-gray-400" href={`/post/${item.id}`}>
                   View more
                 </Link>
+                <button
+                  style={{ marginLeft: '1rem' }}
+                  className="bg-gray-900 p-2 rounded-md font-semibold disabled:bg-gray-700 disabled:text-gray-400"
+                  onClick={() => deletePost.mutate({ id: item.id })}
+                >
+                  Delete
+                </button>
               </article>
             ))}
           </Fragment>
@@ -98,6 +114,7 @@ const IndexPage: NextPageWithLayout = () => {
         <form
           className="py-2 w-4/6"
           onSubmit={async (e) => {
+            console.log(e)
             /**
              * In a real app you probably don't want to use this manually
              * Checkout React Hook Form - it works great with tRPC
@@ -112,6 +129,7 @@ const IndexPage: NextPageWithLayout = () => {
             const input: Input = {
               title: values.title as string,
               text: values.text as string,
+              username: values.username as string,
             };
             try {
               await addPost.mutateAsync(input);
@@ -131,6 +149,14 @@ const IndexPage: NextPageWithLayout = () => {
               placeholder="Title"
               disabled={addPost.isPending}
             />
+            <input
+              className="focus-visible:outline-dashed outline-offset-4 outline-2 outline-gray-700 rounded-xl px-4 py-3 bg-gray-900"
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Username"
+              disabled={addPost.isPending}
+            />
             <textarea
               className="resize-none focus-visible:outline-dashed outline-offset-4 outline-2 outline-gray-700 rounded-xl px-4 py-3 bg-gray-900"
               id="text"
@@ -139,7 +165,7 @@ const IndexPage: NextPageWithLayout = () => {
               disabled={addPost.isPending}
               rows={6}
             />
-
+            
             <div className="flex justify-center">
               <input
                 className="cursor-pointer bg-gray-900 p-2 rounded-md px-16"

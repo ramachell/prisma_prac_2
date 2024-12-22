@@ -17,6 +17,7 @@ async function main() {
       id: firstPostId,
       title: 'First Post',
       text: 'This is an example post generated from `prisma/seed.ts`',
+      username: 'admin',
     },
     update: {},
   });
