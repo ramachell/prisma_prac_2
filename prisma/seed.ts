@@ -21,6 +21,13 @@ async function main() {
     },
     update: {},
   });
+  await prisma.todo.create({
+    data: {
+      id: '1',
+      title: 'First Todo',
+      completed: false,
+    },
+  });
 }
 
 main()

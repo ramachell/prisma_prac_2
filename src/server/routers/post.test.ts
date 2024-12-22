@@ -13,6 +13,7 @@ test('add and get post', async () => {
   const input: inferProcedureInput<AppRouter['post']['add']> = {
     text: 'hello test',
     title: 'hello test',
+    username: 'test',
   };
 
   const post = await caller.post.add(input);
